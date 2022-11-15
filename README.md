@@ -7,7 +7,7 @@
 
 ## Introduction
 
-We often need to get data from multiple tables.  The SQL  `JOIN' clause is used to
+We often need to get data from multiple tables.  The SQL  `JOIN` clause is used to
 combine rows from two or more tables. There are different types of joins.  `INNER JOIN` combines
 tables based on matching the foreign key in one table with the primary key of another table.  Rows
 where the foreign key is null are not included in the result. The `OUTER JOIN` also combines
