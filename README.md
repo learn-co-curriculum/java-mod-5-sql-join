@@ -49,7 +49,6 @@ The data model relationships are as follows:
 
 ![visit table](https://curriculum-content.s3.amazonaws.com/6036/sql-join/visit.png)
 
-## Joining `pet` and `owner`
 
 So far, the queries we've written selected data from one table. But
 what if we need to get data from multiple tables?  For example, suppose
@@ -61,19 +60,40 @@ their owner's name and phone number:
 For each row in the `pet` table, we need a way to add the pet owner's name and phone number.
 Fortunately, SQL has a way of combining rows from different tables based on foreign keys.
 
-The `pet` table includes the foreign key `owner_id`.
-We will use an SQL `INNER JOIN` to combine the rows from the `pet` and `owner` tables based on matching
-the foreign key column `owner_id` in `pet` with the corresponding primary key column `id`  in `owner`.
+
+## SQL INNER JOIN
+
+SQL uses the INNER JOIN operator to combine rows from two or more tables based on 
+having the same values in one or more columns, which is specified with an ON operator.
 
 The general syntax for the `INNER JOIN` statement is shown below.  Normally we preface each column with the table
 as `table_name.column_name` to avoid conflicts with identically named columns:
 
 ```sql
 SELECT *
-FROM table_name1 INNER JOIN table_name2 ON table_name1.foreign_key_column = table_name2.primary_key_column;
+FROM table_name1 INNER JOIN table_name2 ON table_name1.column_1 = table_name2.column_2;
 ```
 
-We will join the  `pet` and `owner` tables using the `pet.owner_id` foreign key and `owner.id` primary key as shown:
+For example, assume we have tables `A` and `B` as shown below.
+An inner join will combine their rows based on matching values in column `z`.
+
+![image inner join](https://curriculum-content.s3.amazonaws.com/6036/java-mod-5-sql-join/inner_join.png)
+
+- The join operation creates a new table, shown on the right.
+- The table contains columns from both `A` and `B`.
+- Table `A` and `B` contain 2 rows with matching values for `z`,
+  thus the new table contains two rows.
+
+NOTE: The column names do not have to be identical in the ON clause, we can join two tables on
+any pair of columns.  In general, we will match a foreign key column in one table
+to the primary key column in another table.
+
+
+## Joining `pet` and `owner`
+
+The `pet` table includes the foreign key `owner_id`.
+We will use an `INNER JOIN` to combine the rows from the `pet` and `owner` tables based on matching
+the foreign key column `owner_id` in `pet` with the corresponding primary key column `id`  in `owner`.
 
 ```sql
 SELECT *
@@ -119,6 +139,8 @@ to using `pet.name` and `owner.name`.  The previous query could be rewritten as:
 SELECT pet.name, species, breed, age, owner.name, phone
 FROM pet INNER JOIN owner ON pet.owner_id = owner.id ;
 ```
+
+
 
 ## Combining JOIN with other SQL clauses
 
@@ -233,10 +255,38 @@ FROM visit INNER JOIN pet ON visit.pet_id = pet.id
 ![join 4 tables](https://curriculum-content.s3.amazonaws.com/6036/sql-join/join_4_tables.png)
 
 
-## OUTER JOIN
+## OUTER JOIN (LEFT, RIGHT)
 
-Let's add another row into the `pet` table.  We don't know the age or owner
-for the cat named `meowie`:
+Let's return to our original example of an `INNER JOIN`.
+An `INNER JOIN` only includes rows from tables `A` and `B` that match values in their respective `z` columns.
+
+![image inner join](https://curriculum-content.s3.amazonaws.com/6036/java-mod-5-sql-join/inner_join.png)
+
+
+We can use a different type of join called a `LEFT OUTER JOIN`, which can be shortened to `LEFT JOIN`,
+to include every row in table `A`, even if there is not a matching row in table `B`.
+
+The image below shows the result of the `LEFT JOIN` operator for tables `A` and `B`. Note
+the result includes a row for every row in table `A` (the table on the left of the JOIN operator).
+There are `null` values in the columns `B.z` and `B.y` for the last row, since table `B` does not have
+a row with `z = 3`.
+
+![image left join](https://curriculum-content.s3.amazonaws.com/6036/java-mod-5-sql-join/left_join.png)
+
+SQL also has a `RIGHT JOIN` operator that includes every row in the table on the right
+of the JOIN operator, which is table `B` in the example below. There are `null` values
+in the columns `A.x` and `A.z` for the middle row, since table `A` does not have
+a row with `z = 4`.
+
+![image right join](https://curriculum-content.s3.amazonaws.com/6036/java-mod-5-sql-join/right_join.png)
+
+
+
+Let's see how to use a `LEFT JOIN` with the pet database.
+We will add another row into the `pet` table.  We don't know the age or owner
+for the cat named `meowie`.  
+
+Execute the following code in **pgAdmin**:
 
 ```sql
 INSERT INTO pet (id, name, species, breed) VALUES (6, 'Meowie', 'cat', 'Calico');
@@ -260,12 +310,7 @@ FROM pet INNER JOIN owner ON pet.owner_id = owner.id;
 
 However, suppose we want to display **every** pet, along with their owner information *if there is an owner*.
 
-The code `x INNER JOIN y on x.fk_id = y.id` only includes rows from table `x` that have a non-null value in
-the foreign key column `x.fk_id`.  We can use a different type of join called a `LEFT OUTER JOIN`
-to include every row in `x` whether the foreign key is null or not.
 
-The code `x LEFT OUTER JOIN y on x.fk_id = y.id`  includes all rows in `x` since `x` is on the left of the JOIN operator.
-If we want every row in table `y`, we would use `RIGHT OUTER JOIN`.
 
 For our `pet` and `owner` tables, the query would be:
 
@@ -287,8 +332,11 @@ based on the foreign and primary keys. Only rows containing a value in the forei
 column are included in the result.  The `OUTER JOIN` operator can be used to
 include rows with null values in the foreign key.
 
+
+
 ## Resources
 
+- [Join Visualization Cheatsheet](https://github.com/amartinson193/SQL_Checkered_Flag_Join_Diagrams/blob/main/checkered_flag_diagram_pg1.png)  
 - [PostgreSQL JOIN documentation](https://www.postgresql.org/docs/current/tutorial-join.html)    
 - [PostgreSQL JOIN tutorial](https://www.tutorialspoint.com/postgresql/postgresql_using_joins.htm)    
 - [W3School JOIN tutorial](https://www.w3schools.com/sql/sql_join.asp)   
